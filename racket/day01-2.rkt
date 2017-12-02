@@ -1,7 +1,6 @@
 #lang racket/base
 (require racket/list)
 
-
 (module+ test
   (require rackunit))
 
