@@ -2,27 +2,29 @@
 (require racket/string)
 (require racket/list)
 
-(define (sort-combos lop)
-  (map (lambda (pair)
-         (sort pair >)) lop))
+(define (make-combos lst)
+  (map (λ (pair)
+          (sort pair >))
+       (combinations lst 2)))
 
 (define (row-checksum lst)
-  (for/first ([pair (sort-combos (combinations lst 2))]
-              #:when (zero? (remainder (car pair) (cadr pair))))
-             (quotient (car pair) (cadr pair))))
+  (for/first ([pair (make-combos lst)]
+              #:when (zero? (modulo (car pair) (cadr pair))))
+             (/ (car pair) (cadr pair))))
 
 (define (column-checksum lol)
   (for/sum ([row lol])
            (row-checksum row)))
 
 (define (parse-spreadsheet str)
-  (map (lambda (l)
+  (map (λ (l)
          (map string->number
               (string-split l "\t")))
     (string-split str "\n")))
 
 (define (spreadsheet-checksum str)
   (column-checksum (parse-spreadsheet str)))
+
 
 (module+ test
   (require rackunit)
@@ -37,7 +39,7 @@
                   (4 5 6))])
 
 (spreadsheet-checksum
-  "6048	6349	208	276	4643	1085	1539	4986	7006	5374	252	4751	226	6757	7495	2923
+"6046	6349	208	276	4643	1085	1539	4986	7006	5374	252	4751	226	6757	7495	2923
 1432	1538	1761	1658	104	826	806	109	939	886	1497	280	1412	127	1651	156
 244	1048	133	232	226	1072	883	1045	1130	252	1038	1022	471	70	1222	957
 87	172	93	73	67	192	249	239	155	23	189	106	55	174	181	116
