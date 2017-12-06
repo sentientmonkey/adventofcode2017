@@ -1,13 +1,18 @@
 #lang racket/base
 (require racket/string)
+(require racket/list)
 (require syntax/parse/define)
+
+(define (string-permutations s)
+  (remove-duplicates (map (lambda (l) (apply string l)) (permutations (string->list s)))))
 
 (define (valid-passphrase s)
   (let ([words (string-split s)]
         [ht (make-hash)])
     (for/and ([word words])
-             (hash-update! ht word add1 0)
-             (eq? (hash-ref ht word) 1))))
+             (for/and ([permutation (string-permutations word)])
+                      (hash-update! ht permutation add1 0)
+                      (eq? (hash-ref ht permutation) 1)))))
 
 (define-simple-macro (for/count a b)
   (for/sum a
@@ -22,10 +27,8 @@
 
 (module+ test
   (require rackunit)
-  [check-true (valid-passphrase "aa bb cc dd ee")]
-  [check-false (valid-passphrase "aa bb cc dd aa")]
-  [check-true (valid-passphrase "aa bb cc dd aaa")]
-  [check-equal? (valid-passphrase-count "aa bb cc dd ee\naa bb cc dd aa\naa bb cc dd aaa") 2])
+  [check-true (valid-passphrase "abcde fghij")]
+  [check-false (valid-passphrase "abcde xyz ecdab")])
 
 (valid-passphrase-count "bdwdjjo avricm cjbmj ran lmfsom ivsof
 mxonybc fndyzzi gmdp gdfyoi inrvhr kpuueel wdpga vkq
