@@ -5,21 +5,18 @@
   (require rackunit))
 
 (define (split-list lst)
- (split-at lst
-           (quotient (length lst) 2)))
+ (split-at lst (quotient (length lst) 2)))
 
 (define (sum-of-sequences lst)
   (let-values ([(a b) (split-list lst)])
-    (for/fold ([sum 0])
-            ([i a]
+    (for/sum ([i a]
              [j b])
             (if (eq? i j)
-                (+ sum i j)
-                sum))))
+                (+ i j)
+                0))))
 
 (define (string->number-list s)
-    (map (lambda (x) (string->number (make-string 1 x)))
-       (string->list s)))
+  (map (compose string->number list->string list) (string->list s)))
 
 (define (captcha s)
   (sum-of-sequences (string->number-list s)))
