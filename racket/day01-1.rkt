@@ -1,21 +1,23 @@
 #lang racket/base
 (require racket/list)
+(require syntax/parse/define)
 
 (module+ test
   (require rackunit))
 
-(define (sum-helper lst)
-  (for/fold ([sum 0]
+(define-simple-macro (for/fold/first e ...)
+  (let-values
+    (([x _]
+      (for/fold e ...))) x))
+
+(define (sum-of-sequences lst)
+  (for/fold/first ([sum 0]
              [prev (last lst)])
             ([i lst])
             (values (if (eq? i prev)
                       (+ sum i)
                       sum)
                     i)))
-
-(define (sum-of-sequences l)
-  (let-values
-    ([(x y) (sum-helper l)]) x))
 
 (module+ test
   (check-equal?
@@ -28,8 +30,7 @@
     (sum-of-sequences '(9 1 2 1 2 1 2 9)) 9))
 
 (define (string->number-list s)
-  (map (lambda (x) (string->number (make-string 1 x)))
-       (string->list s)))
+  (map (compose string->number list->string list) (string->list s)))
 
 (module+ test
   (check-equal?
