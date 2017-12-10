@@ -12,12 +12,12 @@
 
 (define (sum-of-sequences lst)
   (for/fold/first ([sum 0]
-             [prev (last lst)])
-            ([i lst])
-            (values (if (eq? i prev)
-                      (+ sum i)
-                      sum)
-                    i)))
+                   [prev (last lst)])
+                  ([i lst])
+                  (values (if (eq? i prev)
+                            (+ sum i)
+                            sum)
+                          i)))
 
 (module+ test
   (check-equal?
