@@ -2,6 +2,7 @@
 (require racket/list)
 (require racket/string)
 (require racket/match)
+(require syntax/parse/define)
 
 (define (path->list str)
   (string-split str ","))
@@ -25,17 +26,19 @@
   (/ (for/sum ([x v])
            (abs x)) 2))
 
-(define (path-max-distance lst pos currmax)
-  (let* ([dist (from-origin pos)]
-         [maxdist (max dist currmax)])
-    (if (null? lst)
-      maxdist 
-      (let ([a (car lst)]
-            [rst (cdr lst)])
-        (path-max-distance rst (add-v pos (direction->v a)) maxdist)))))
+(define-simple-macro (for/fold/first e ...)
+  (let-values
+    (([x _]
+      (for/fold e ...))) x))
 
 (define (hex-max-distance str)
-  (path-max-distance (path->list str) origin 0))
+  (for/fold/first ([maxdist 0]
+              [pos origin])
+             ([a (path->list str)])
+             (let* ([d (direction->v a)]
+                    [next (add-v pos d)]
+                    [dist (from-origin next)])
+               (values (max dist maxdist) next))))
 
 (module+ test
   (require rackunit)

@@ -25,15 +25,11 @@
   (/ (for/sum ([x v])
            (abs x)) 2))
 
-(define (path-distance lst pos)
-  (if (null? lst)
-    (from-origin pos)
-    (let ([a (car lst)]
-          [rst (cdr lst)])
-      (path-distance rst (add-v pos (direction->v a))))))
-
 (define (hex-distance str)
-  (path-distance (path->list str) origin))
+  (from-origin
+    (for/fold ([pos origin])
+              ([a (path->list str)])
+              (add-v pos (direction->v a)))))
 
 (module+ test
   (require rackunit)
