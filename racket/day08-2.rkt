@@ -32,25 +32,28 @@
     [(list reg "inc" val) (operand + env reg val)]
     [(list reg "dec" val) (operand - env reg val)]))
 
-(define (cpu-max str)
-  (let-values ([(_ result)
-                (for/fold ([env (make-immutable-hash)]
-                           [max-reg 0])
-                          ([ins (parse-instructions str)])
-                          (let* ([oper (car ins)]
-                                 [condition (cadr ins)]
-                                 [nenv
-                                   (if (eval-cond env condition)
-                                     (eval-operand env oper)
-                                     env)]
-                                 [nmax-reg (max-register nenv)])
-                            (values nenv (max max-reg nmax-reg))))])
-    result))
+(define-simple-macro (for/fold/first e ...)
+  (let-values
+    (([x _]
+      (for/fold e ...))) x))
 
 (define (max-register env)
   (if (hash-empty? env)
     0
     (apply max (hash-values env))))
+
+(define (cpu-max str)
+  (for/fold/first ([max-reg 0]
+                   [env (make-immutable-hash)])
+                  ([ins (parse-instructions str)])
+                  (let* ([oper (car ins)]
+                         [condition (cadr ins)]
+                         [nenv
+                           (if (eval-cond env condition)
+                             (eval-operand env oper)
+                             env)]
+                         [nmax-reg (max-register nenv)])
+                    (values (max max-reg nmax-reg) nenv))))
 
 (module+ test
   (require rackunit)
